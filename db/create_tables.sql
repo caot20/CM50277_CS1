@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS timezones (
 CREATE TABLE IF NOT EXISTS pilot_positions (
     pilot_position_id INT NOT NULL,
     position VARCHAR(50) NOT NULL,
-    CONSTRAINT pk_pilot_positions PRIMARY KEY (pilot_position_id)
+    CONSTRAINT pk_pilot_positions PRIMARY KEY (pilot_position_id),
+    CONSTRAINT uq_position UNIQUE (position)
 );
 
 CREATE TABLE IF NOT EXISTS pilots (
@@ -79,7 +80,7 @@ CREATE TABLE IF NOT EXISTS flights (
     CHECK (destination_scheduled_arrival_time_utc > origin_scheduled_departure_time_utc),
 
     CONSTRAINT fk_origin_id__destinations
-    FOREIGN KEY (destination_id)
+    FOREIGN KEY (origin_id)
     REFERENCES destinations (destination_id)
     ON DELETE SET NULL,
 
