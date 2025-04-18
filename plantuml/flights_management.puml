@@ -1,0 +1,100 @@
+@startuml
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "flights" as f {
+    <u>flight_id</u>: int <<PK>> <<AUTOINCREMENT>>
+    --
+    flight_number: text
+    origin_id: int <<FK>>
+    origin_scheduled_departure_time_utc: text
+    destination_id: int <<FK>>
+    destination_scheduled_arrival_time_utc: text
+    scheduled_pilot_1: int <<FK>>
+    scheduled_pilot_2: int <<FK>>
+    --
+    CHECK (destination_scheduled_arrival_time_utc > origin_scheduled_departure_time_utc)
+}
+
+entity "pilots" as p {
+    <u>pilot_id</u>: int <<PK>> <<AUTOINCREMENT>>
+    --
+    pilot_position_id: int <<FK>>
+    name: text
+    passport_number: text <<UNIQUE>>
+    nationality: text
+}
+
+entity "destinations" as d {
+    <u>destination_id</u>: int <<PK>> <<AUTOINCREMENT>>
+    --
+    iata_code: text <<UNIQUE>>
+    icao_code: text <<UNIQUE>>
+    latitude: real
+    longitude: real
+    description: text
+    area: text
+    timezone_id: int <<FK>>
+    country_code_id: int <<FK>>
+}
+
+entity "pilot_positions" as pp {
+    <u>pilot_position_id</u>: int <<PK>>
+    --
+    position: text <<UNIQUE>>
+}
+
+entity "timezones" as tz {
+    <u>timezone_id</u>: int <<PK>> <<AUTOINCREMENT>>
+    --
+    timezone: text <<UNIQUE>>
+    utc_offset: real
+}
+
+entity "countries" as c {
+    <u>country_code_id</u>: int <<PK>>
+    --
+    alpha_2: text <<UNIQUE>>
+    alpha_3: text <<UNIQUE>>
+    country: text <<UNIQUE>>
+}
+
+f }o--|| d : origin_id --|| destination_id
+' note on link
+'   FOREIGN KEY: origin_id 
+'   REFERENCES destinations.destination_id
+' end note
+
+f }o--|| d : destination_id --|| destination_id
+' note on link
+'   FOREIGN KEY: destination_id 
+'   REFERENCES destinations.destination_id
+' end note
+
+f }|--|| p : scheduled_pilot_1 --|| pilot_id
+' note on link
+'   FOREIGN KEY: scheduled_pilot_1 REFERENCES pilots.pilot_id
+' end note
+f }|--|| p : scheduled_pilot_2 --|| pilot_id
+' note on link
+'   FOREIGN KEY: scheduled_pilot_2 
+'   REFERENCES pilots.pilot_id
+' end note
+
+d }|--|| tz : timezone_id
+' note on link
+'   FOREIGN KEY: timezone_id 
+'   REFERENCES timezones.timezone_id
+' end note
+d }|--|| c : country_code_id
+' note on link
+'   FOREIGN KEY: country_code_id 
+'   REFERENCES countries.country_code_id
+' end note
+
+p }|--|| pp : pilot_position_id
+' note on link
+'   FOREIGN KEY: pilot_position_id 
+'   REFERENCES pilot_positions.pilot_position_id
+' end note
+@enduml
